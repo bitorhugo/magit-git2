@@ -1859,10 +1859,14 @@ KEY is (DIRECTORY GLOBAL-ARGS . LOCAL-ARGS).")
 (defun magit-git2--finish-process (process)
   "Wait for PROCESS and free it later; return (EXIT STDOUT STDERR).
 Nil when it did not end by itself."
-  (let ((errors (process-get process 'magit-git2-errors)))
-    ;; Neither pipe may fill up, and no timer or other process runs
-    ;; here, as none does while `call-process' waits.  A process that
-    ;; ended long ago still has its output to read.
+  (let ((errors (process-get process 'magit-git2-errors))
+        ;; As while `call-process' waits, no timer runs here and no
+        ;; output of another process is read.  Their sentinels do run,
+        ;; and whatever they call, timers included, could redisplay the
+        ;; half built buffer.
+        (inhibit-redisplay t))
+    ;; Neither pipe may fill up.  A process that ended long ago still
+    ;; has its output to read.
     (while (or (accept-process-output process 0.005 nil 0)
                (process-live-p process))
       (accept-process-output errors 0 nil 0))

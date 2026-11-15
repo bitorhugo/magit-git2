@@ -371,6 +371,27 @@ Return (MISMATCHES . ANSWERED), ANSWERED the shapes that answered."
                      '(0 "false\n" ""))))
     (magit-git2-test--settle)))
 
+(ert-deftest magit-git2-test-ahead-redisplay ()
+  "Waiting for a command started ahead lets no sentinel redisplay."
+  :tags '(git2)
+  (let* ((default-directory (magit-git2-test--clean-repo))
+         (inhibited 'unset)
+         (other (make-process
+                 :name "other"
+                 :command (list (magit-git-executable) "--version")
+                 :noquery t
+                 :sentinel (lambda (_process _event)
+                             (setq inhibited inhibit-redisplay))))
+         (process (magit-git2--start-process
+                   (cons magit-git-global-arguments
+                         '("rev-parse" "--is-bare-repository"))))
+         (end (+ (float-time) 10)))
+    ;; Over, but its sentinel waits for Emacs to wait.
+    (while (and (process-live-p other) (< (float-time) end)))
+    (should (equal (magit-git2--finish-process process) '(0 "false\n" "")))
+    (should (eq inhibited t))
+    (magit-git2-test--settle)))
+
 (ert-deftest magit-git2-test-ahead-unused ()
   "A command nothing asks for ends by itself and is not started again."
   :tags '(git2)

@@ -57,6 +57,9 @@ differential tests.
   `accept-process-output` to hand over its stdout.
 - `delete-process` always redisplays. Mid-refresh that shows a half-built
   buffer, so finished processes are freed from a zero timer.
+- While Magit waits for a command started ahead, the sentinels of other
+  processes run, and through them timers, that zero timer included. So the
+  wait binds `inhibit-redisplay`.
 - On Windows `directory-file-name` lowers the drive letter. Never pass text
   meant to equal git's output through file-name primitives.
 - Emacs never unloads a module, and Windows cannot replace or delete a loaded
@@ -73,8 +76,12 @@ Zig 0.17 has no `@cImport` (use `b.addTranslateC`) and no `**` on arrays (use
 ## Measuring
 
 `batch` Emacs has no redisplay: count redisplays in a tty Emacs under `script`
-with `pre-redisplay-functions`. File operations per call are counted with an
-`LD_PRELOAD` shim.
+with `pre-redisplay-functions`. That hook runs in each window's buffer, so
+relative file names resolve against its directory, and its errors are
+dropped silently (`backtrace-to-string` needs `(require 'backtrace)`). A
+fresh `--init-directory` compiles natively in the background, whose
+sentinels make a good stress case. File operations per call are counted
+with an `LD_PRELOAD` shim.
 
 Measurement reports name real repositories, branches and paths. They stay
 local (`measure/report-*.org` and `measure/*/` are ignored), and nothing from
