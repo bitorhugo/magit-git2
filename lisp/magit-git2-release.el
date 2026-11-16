@@ -14,10 +14,10 @@
 
 ;;; Code:
 
-(defconst magit-git2-release-sources "6a76b2f976a81d49321bb43ba76edb9b73d74864"
+(defconst magit-git2-release-sources "a68b2b6ea2890a6be0dd9a5c9300290454fa8cc3"
   "The key of the sources the released builds were made from.")
 
-(defconst magit-git2-release-tag "magit-git2-core-b1ee52730a71"
+(defconst magit-git2-release-tag "magit-git2-core-374977ac4486"
   "The GitHub release holding the builds.")
 
 (defconst magit-git2-release-sha256
