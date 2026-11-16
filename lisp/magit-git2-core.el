@@ -79,12 +79,20 @@ See `magit-git2-core-ensure'.")
   "The pinned SHA-256 of the release build for this system, or nil."
   (cdr (assoc (magit-git2-core--platform) magit-git2-release-sha256)))
 
+(defun magit-git2-core--released-name ()
+  "The name of the release build for this system, or nil if it has none.
+The release has the build under this name, which
+build/release-asset-name.sh gives it, and so has
+`magit-git2-core-directory'.  Every release published uses it, so a new
+format breaks the download of older pins."
+  (when-let* ((sha256 (magit-git2-core--sha256)))
+    (format "magit-git2-core-%s-%s%s" (magit-git2-core--platform)
+            (substring sha256 0 12) module-file-suffix)))
+
 (defun magit-git2-core--released-file ()
   "The file of the release build for this system, or nil if it has none."
-  (when-let* ((sha256 (magit-git2-core--sha256)))
-    (expand-file-name
-     (concat "magit-git2-core-" (substring sha256 0 12) module-file-suffix)
-     magit-git2-core-directory)))
+  (when-let* ((name (magit-git2-core--released-name)))
+    (expand-file-name name magit-git2-core-directory)))
 
 (defun magit-git2-core--own-file ()
   "The file of a module put in place by hand."
@@ -128,9 +136,8 @@ nothing, so this loads a temporary copy of `magit-git2-core--file'."
 
 (defun magit-git2-core--url ()
   "The URL of the release build for this system."
-  (format "%s/%s/magit-git2-core-%s%s" magit-git2-core-release-url
-          magit-git2-release-tag (magit-git2-core--platform)
-          module-file-suffix))
+  (format "%s/%s/%s" magit-git2-core-release-url magit-git2-release-tag
+          (magit-git2-core--released-name)))
 
 (defun magit-git2-core--fail (reason)
   "Report that the module stays out of use because of REASON."

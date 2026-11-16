@@ -30,20 +30,25 @@ if [ "$key" = "$pinned" ] || [ "$key" != "$(sources HEAD)" ]; then
 fi
 
 tag=magit-git2-core-$(git rev-parse --short=12 "$GITHUB_SHA")
+
+sha256() {
+    sha256sum "$artifacts/magit-git2-core-$1/magit-git2-core$2" | cut -d' ' -f1
+}
+
+windows=$(sha256 windows-x86_64 .dll)
+linux=$(sha256 linux-x86_64 .so)
+
+# A build goes up under the name magit-git2-core.el downloads it by.
 dist=$(mktemp -d)
 cp "$artifacts/magit-git2-core-windows-x86_64/magit-git2-core.dll" \
-   "$dist/magit-git2-core-windows-x86_64.dll"
+   "$dist/$(build/release-asset-name.sh windows-x86_64 "$windows" .dll)"
 cp "$artifacts/magit-git2-core-linux-x86_64/magit-git2-core.so" \
-   "$dist/magit-git2-core-linux-x86_64.so"
+   "$dist/$(build/release-asset-name.sh linux-x86_64 "$linux" .so)"
 
 gh release view "$tag" >/dev/null 2>&1 ||
     gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
        --notes "The magit-git2-core modules built from $GITHUB_SHA."
 gh release upload "$tag" "$dist"/* --clobber
-
-sha256() {
-    sha256sum "$dist/$1" | cut -d' ' -f1
-}
 
 write_pins() {
     cat > "$pins" <<PINS
@@ -71,9 +76,9 @@ write_pins() {
 
 (defconst magit-git2-release-sha256
   '(("windows-x86_64"
-     . "$(sha256 magit-git2-core-windows-x86_64.dll)")
+     . "$windows")
     ("linux-x86_64"
-     . "$(sha256 magit-git2-core-linux-x86_64.so)"))
+     . "$linux"))
   "The SHA-256 of the build for each platform.")
 
 (provide 'magit-git2-release)
