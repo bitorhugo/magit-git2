@@ -103,8 +103,9 @@ Magit does not wait: it runs git until the module is there, and then
 neither on DNS nor on TLS; Windows has one since version 10, and it reads the
 Windows certificate store. If it fails, the message says why and Magit goes on
 with git. Then `M-x magit-git2-download-module` tries again. Where the network
-blocks it, get the file from the release page and save it in that directory
-as `magit-git2-core.so` (`magit-git2-core.dll` on Windows).
+blocks it, get the file for your system from the release that
+`lisp/magit-git2-release.el` names, and save it in that directory under its
+own name.
 
 A release build lands there only if its SHA-256 is the one pinned in
 `lisp/magit-git2-release.el`, under a name with that hash: a new build goes

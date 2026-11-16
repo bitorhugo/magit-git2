@@ -604,10 +604,6 @@ files `module-load' got in LOADED and the hook's runs in RAN."
   (declare (indent 0))
   `(let* ((root (make-temp-file "magit-git2-release" t))
           (platform (magit-git2-core--platform))
-          (asset (expand-file-name
-                  (format "t1/magit-git2-core-%s%s" platform
-                          module-file-suffix)
-                  root))
           (magit-git2-core-directory (expand-file-name "modules/" root))
           (magit-git2-core-release-url (concat "file://" root))
           (magit-git2-release-tag "t1")
@@ -616,6 +612,8 @@ files `module-load' got in LOADED and the hook's runs in RAN."
           (magit-git2-core-error "not loaded")
           (magit-git2-core--download nil)
           (file (magit-git2-core--released-file))
+          (asset (expand-file-name
+                  (concat "t1/" (file-name-nondirectory file)) root))
           (loaded nil)
           (ran 0)
           (magit-git2-core-loaded-hook (list (lambda () (cl-incf ran)))))
